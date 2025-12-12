@@ -143,8 +143,8 @@ resource "aws_instance" "app_server" {
               # The EC2 instance uses its IAM role to authenticate to ECR.
               REPO_URI="${var.ecr_image_uri}"
               
-              # Log in to ECR
-              $$(/usr/bin/aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry_uri})
+              # Log in to ECR using the official command format
+              sudo aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry_uri}
               
               # Pull the image
               sudo docker pull $${REPO_URI}
