@@ -144,16 +144,16 @@ resource "aws_instance" "app_server" {
               REPO_URI="${var.ecr_image_uri}"
               
               # Log in to ECR
-              $(/usr/bin/aws ecr get-login --no-include-email --region ${var.aws_region})
+              $$(/usr/bin/aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry})
               
               # Pull the image
-              sudo docker pull ${REPO_URI}
+              sudo docker pull $${REPO_URI}
               
               # Run the new container
               sudo docker run -d \
                 -p 80:5000 \
                 --name quote-of-the-day \
-                ${REPO_URI}
+                $${REPO_URI}
               
               EOF
 }

@@ -57,7 +57,8 @@ jobs:
       run: |
         terraform plan -no-color -input=false \
           -var="ecr_image_uri=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}" \
-          -var="aws_region=${{ env.AWS_REGION }}"
+          -var="aws_region=${{ env.AWS_REGION }}" \
+          -var="ecr_registry_uri=${{ secrets.ECR_REGISTRY }}"
       working-directory: ./infrastructure
 
     - name: Terraform Apply
@@ -67,5 +68,6 @@ jobs:
       run: |
         terraform apply -auto-approve \
           -var="ecr_image_uri=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}" \
-          -var="aws_region=${{ env.AWS_REGION }}"
+          -var="aws_region=${{ env.AWS_REGION }}" \
+          -var="ecr_registry_uri=${{ secrets.ECR_REGISTRY }}"
       working-directory: ./infrastructure
