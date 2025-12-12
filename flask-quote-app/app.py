@@ -53,7 +53,6 @@ def home():
     """The main route that fetches the quote and renders HTML."""
     ai_quote = get_ai_quote()
 
-    # HTML template embedded in the function for simplicity (render_template_string)
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -70,7 +69,7 @@ def home():
     </head>
     <body>
         <div class="container">
-            <h1>AI Wisdom of the Day</h1>
+            <h1>AI Wisdom of the Day REBORN!!!</h1>
             <p class="quote">"{ai_quote}"</p>
             <div class="footer">
                 Generated dynamically by the <strong>Amazon Bedrock (Titan Express)</strong> LLM.
