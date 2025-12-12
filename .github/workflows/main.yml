@@ -41,26 +41,31 @@ jobs:
         docker tag $ECR_REPOSITORY $IMAGE_URI
         docker push $IMAGE_URI
 
-    # ================= CD (Deployment to EC2) =================
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
+    # ================= CD (Terraform IaC) =================
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
       with:
-        host: ${{ secrets.EC2_HOST_IP }}  # You will need to add this secret
-        username: ec2-user
-        key: ${{ secrets.EC2_PRIVATE_KEY }} # You will need to add this secret
-        script: |
-          # 1. Login to ECR on the EC2 instance (using its IAM Role for auth)
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+        terraform_version: 1.0.0 # Specify a version if needed
 
-          # 2. Pull the newly updated image
-          sudo docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}
-          
-          # 3. Stop the old container
-          sudo docker stop ai-quote-service || true
-          sudo docker rm ai-quote-service || true
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      working-directory: ./infrastructure
 
-          # 4. Run the new container (using the same mapping)
-          sudo docker run -d \
-            -p 80:5000 \
-            --name ai-quote-service \
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}
+    - name: Terraform Plan
+      id: plan
+      run: |
+        terraform plan -no-color -input=false \
+          -var="ecr_image_uri=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}" \
+          -var="aws_region=${{ env.AWS_REGION }}"
+      working-directory: ./infrastructure
+
+    - name: Terraform Apply
+      id: apply
+      # Only deploy if there are changes to the infrastructure plan
+      if: steps.plan.outcome == 'success'
+      run: |
+        terraform apply -auto-approve \
+          -var="ecr_image_uri=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}" \
+          -var="aws_region=${{ env.AWS_REGION }}"
+      working-directory: ./infrastructure
