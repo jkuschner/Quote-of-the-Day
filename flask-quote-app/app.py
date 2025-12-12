@@ -32,7 +32,7 @@ def get_ai_quote():
         response = bedrock.invoke_model(
             body=body,
             modelId=MODEL_ID,
-            accept='applications/json',
+            accept='application/json',
             contentType='application/json'
         )
 
@@ -48,12 +48,12 @@ def get_ai_quote():
         print(f"Error calling Bedrock: {e}")
         return "API error"
     
-    @app.route('/')
-    def home():
-        """The main route that fetches the quote and renders HTML."""
-        ai_quote = get_ai_quote()
+@app.route('/')
+def home():
+    """The main route that fetches the quote and renders HTML."""
+    ai_quote = get_ai_quote()
 
-        # HTML template embedded in the function for simplicity (render_template_string)
+    # HTML template embedded in the function for simplicity (render_template_string)
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
