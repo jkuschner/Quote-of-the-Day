@@ -35,6 +35,24 @@ resource "aws_iam_policy" "ecr_pull" {
   })
 }
 
+# IAM Policy for Bedrock
+resource "aws_iam_policy" "bedrock_invoke" {
+  name        = "EC2_Bedrock_Invoke_Policy"
+  description = "Allows the EC2 instance to invoke the Bedrock Titan model"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel"
+        ]
+        Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/amazon.titan-text-express-v1"
+      },
+    ]
+  })
+}
+
 # IAM Role that the EC2 instance will assume
 resource "aws_iam_role" "app_role" {
   name = "App_EC2_Instance_Role"
@@ -57,6 +75,12 @@ resource "aws_iam_role" "app_role" {
 resource "aws_iam_role_policy_attachment" "ecr_attach" {
   role       = aws_iam_role.app_role.name
   policy_arn = aws_iam_policy.ecr_pull.arn
+}
+
+# Attach the Bedrock Invoke Policy to the Role
+resource "aws_iam_role_policy_attachment" "bedrock_attach" {
+  role       = aws_iam_role.app_role.name
+  policy_arn = aws_iam_policy.bedrock_invoke.arn
 }
 
 # Instance Profile (required to assign the Role to the EC2 instance)
