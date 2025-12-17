@@ -69,7 +69,7 @@ def home():
     </head>
     <body>
         <div class="container">
-            <h1>AI Wisdom of the Day</h1>
+            <h1>AI Wisdom of the Day Demo!!!</h1>
             <p class="quote">"{ai_quote}"</p>
             <div class="footer">
                 Generated dynamically by the <strong>Amazon Bedrock (Titan Express)</strong> LLM.
