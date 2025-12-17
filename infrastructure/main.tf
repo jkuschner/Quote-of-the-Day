@@ -53,74 +53,87 @@ resource "aws_iam_policy" "bedrock_invoke" {
   })
 }
 
-# IAM Role that the EC2 instance will assume
-resource "aws_iam_role" "app_role" {
-  name = "App_EC2_Instance_Role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+# IAM Role that the EC2 instance will assume
+data "aws_iam_role" "app_role" {
+  name = "App_EC2_Instance_Role"
 }
+
+#resource "aws_iam_role" "app_role" {
+#  name = "App_EC2_Instance_Role"
+#
+#  assume_role_policy = jsonencode({
+#    Version = "2012-10-17"
+#    Statement = [
+#      {
+#        Action = "sts:AssumeRole"
+#        Effect = "Allow"
+#        Principal = {
+#          Service = "ec2.amazonaws.com"
+#        }
+#      },
+#    ]
+#  })
+#}
 
 # Attach the ECR Pull Policy to the Role
-resource "aws_iam_role_policy_attachment" "ecr_attach" {
-  role       = aws_iam_role.app_role.name
-  policy_arn = aws_iam_policy.ecr_pull.arn
-}
+#resource "aws_iam_role_policy_attachment" "ecr_attach" {
+#  role       = aws_iam_role.app_role.name
+#  policy_arn = aws_iam_policy.ecr_pull.arn
+#}
 
 # Attach the Bedrock Invoke Policy to the Role
-resource "aws_iam_role_policy_attachment" "bedrock_attach" {
-  role       = aws_iam_role.app_role.name
-  policy_arn = aws_iam_policy.bedrock_invoke.arn
-}
+#resource "aws_iam_role_policy_attachment" "bedrock_attach" {
+#  role       = aws_iam_role.app_role.name
+#  policy_arn = aws_iam_policy.bedrock_invoke.arn
+#}
 
 # Instance Profile (required to assign the Role to the EC2 instance)
-resource "aws_iam_instance_profile" "app_profile" {
+data "aws_iam_instance_profile" "app_profile" {
   name = "App_EC2_Instance_Profile"
-  role = aws_iam_role.app_role.name
 }
+
+#resource "aws_iam_instance_profile" "app_profile" {
+#  name = "App_EC2_Instance_Profile"
+#  role = aws_iam_role.app_role.name
+#}
 
 # --- 2. Security Group (Firewall) ---
 
-resource "aws_security_group" "app_sg" {
-  name        = "app-server-sg"
-  description = "Allow SSH, HTTP (Port 80)"
-
-  # Inbound SSH (from anywhere for flexibility)
-  ingress {
-    description = "SSH access"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Inbound HTTP (from anywhere)
-  ingress {
-    description = "HTTP access"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Outbound (allow all internet traffic)
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+data "aws_security_group" "app_sg" {
+  name = "app-server-sg"
 }
+
+#resource "aws_security_group" "app_sg" {
+#  name        = "app-server-sg"
+#  description = "Allow SSH, HTTP (Port 80)"
+#
+#  # Inbound SSH (from anywhere for flexibility)
+#  ingress {
+#    description = "SSH access"
+#    from_port   = 22
+#    to_port     = 22
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Inbound HTTP (from anywhere)
+#  ingress {
+#    description = "HTTP access"
+#    from_port   = 80
+#    to_port     = 80
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Outbound (allow all internet traffic)
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
 
 # --- 3. EC2 Instance Definition ---
 
