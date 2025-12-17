@@ -154,10 +154,10 @@ resource "aws_instance" "app_server" {
   # The Key Pair you created earlier
   key_name = "AI-Quote-Server-key-pair"
 
-  vpc_security_group_ids = [aws_security_group.app_sg.id]
+  vpc_security_group_ids = [data.aws_security_group.app_sg.id]
   
   # Assign the ECR Pull Role
-  iam_instance_profile = aws_iam_instance_profile.app_profile.name 
+  iam_instance_profile = data.aws_iam_instance_profile.app_profile.name 
 
   tags = {
     Name = "CI-CD-Quote-Server"
